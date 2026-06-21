@@ -8,6 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#050907">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/nosleep/0.12.0/NoSleep.min.js"></script>
   <title>Click Tracker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -484,6 +485,7 @@
         </div>
       </div>
       <div class="select-divider">CLICK<br>TRACKER</div>
+      <button id="toggle-no-sleep">Toggle No Sleep</button>
       <div class="select-half corp-half" data-side="corp">
         <div class="half-content">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -775,6 +777,22 @@
       newGameBtn.addEventListener('click', handleNewGame);
 
     })();
+
+    const noSleep = new NoSleep();
+
+    let wakeLockEnabled = false;
+    const toggleEl = document.querySelector("#toggle-no-sleep");
+    toggleEl.addEventListener('click', function() {
+        if (!wakeLockEnabled) {
+            noSleep.enable(); // keep the screen on!
+            wakeLockEnabled = true;
+            window.alert('No Sleep Activated')
+        } else {
+            noSleep.disable(); // let the screen turn off.
+            wakeLockEnabled = false;
+            window.alert('No Sleep Deactivated')
+        }
+    }, false);
   </script>
 </body>
 
