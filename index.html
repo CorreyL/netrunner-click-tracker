@@ -510,6 +510,10 @@
           <p>3 clicks per turn</p>
         </div>
       </div>
+      <button id="btn-fullscreen">
+        <!--TODO: Fullscreen SVG Goes Here-->
+        Fullscreen
+      </button>
     </div>
 
     <div id="screen-main" class="screen">
@@ -651,6 +655,7 @@
       const undoTurnBtn = document.getElementById('undo-click');
       const endTurnBtn = document.getElementById('btn-endturn');
       const newGameBtn = document.getElementById('btn-newgame');
+      const fullscreenBtn = document.getElementById('btn-fullscreen');
 
       const RUNNER_ICON =
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 11 14 9 22 21 10 13 10 13 2"/></svg>';
@@ -773,6 +778,18 @@
         }
       }
 
+      function handleFullScreen() {
+        const el = document.documentElement;
+
+        if (el.requestFullscreen) {
+          el.requestFullscreen();
+        } else if (el.webkitRequestFullscreen) { // Safari/iOS
+          el.webkitRequestFullscreen();
+        } else if (el.msRequestFullscreen) { // old Edge/IE
+          el.msRequestFullscreen();
+        }
+      }
+
       // ---------- Wire up events ----------
       document.querySelectorAll('.select-half').forEach(function (el) {
         el.addEventListener('click', function () {
@@ -784,7 +801,7 @@
       undoTurnBtn.addEventListener('click', handleUndoTurn);
       endTurnBtn.addEventListener('click', handleEndTurn);
       newGameBtn.addEventListener('click', handleNewGame);
-
+      fullscreenBtn.addEventListener('click', handleFullScreen);
     })();
 
     const noSleep = new NoSleep();
