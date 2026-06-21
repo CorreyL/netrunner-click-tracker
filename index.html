@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#050907">
+  <title>Click Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+
+    body {
+      width: 100vw;
+      height: 100dvh;
+      position: relative;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
+      color: #fff;
+    }
+
+    /* ---------- Theme tokens ---------- */
+    body.theme-runner {
+      --bg: #050907;
+      --surface: #0b140f;
+      --border: #1c3a24;
+      --primary: #B54841;
+      --glow: rgba(181, 72, 65, 0.35);
+      --warn: #ff2079;
+      --warn-glow: rgba(255, 32, 121, 0.5);
+      --text: #d8ffe8;
+      --muted: #5d8a6a;
+      --font-display: 'Share Tech Mono', monospace;
+      --font-ui: 'Share Tech Mono', monospace;
+    }
+
+    body.theme-corp {
+      --bg: #070b12;
+      --surface: #0e1622;
+      --border: #1c3148;
+      --primary: #4fc3f7;
+      --glow: rgba(79, 195, 247, 0.3);
+      --warn: #ff7a45;
+      --warn-glow: rgba(255, 122, 69, 0.5);
+      --text: #eaf4ff;
+      --muted: #5a7088;
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-ui: 'IBM Plex Sans', sans-serif;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+      height: 100%;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* ---------- Select screen ---------- */
+    #screen-select {
+      flex-direction: row;
+    }
+
+    .select-half {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: flex .3s ease, filter .15s ease;
+    }
+
+    .select-half:active {
+      filter: brightness(1.35);
+    }
+
+    .runner-half {
+      background: radial-gradient(ellipse at center, #0e1f14 0%, #050a07 75%);
+      color: #B54841;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .corp-half {
+      background: radial-gradient(ellipse at center, #0d1826 0%, #060a12 75%);
+      color: #5ac8fa;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .half-content {
+      text-align: center;
+      z-index: 2;
+      padding: 0 16px;
+    }
+
+    .half-content svg {
+      width: clamp(34px, 7vh, 60px);
+      height: auto;
+      margin-bottom: clamp(6px, 1.5vh, 14px);
+    }
+
+    .half-content h2 {
+      font-size: clamp(1.3rem, 5.5vh, 2.6rem);
+      letter-spacing: 0.16em;
+      margin-bottom: 0.4em;
+    }
+
+    .half-content p {
+      font-size: clamp(0.7rem, 2.2vh, 1rem);
+      opacity: 0.7;
+      letter-spacing: 0.08em;
+    }
+
+    .select-divider {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      font-family: 'Share Tech Mono', monospace;
+      color: #7a7a7a;
+      font-size: clamp(0.55rem, 1.6vh, 0.8rem);
+      letter-spacing: 0.35em;
+      line-height: 1.7;
+      z-index: 5;
+      pointer-events: none;
+      text-shadow: 0 0 12px rgba(0, 0, 0, 0.9);
+    }
+
+    /* ---------- Main screen ---------- */
+    #screen-main {
+      flex-direction: column;
+      background: var(--bg);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: clamp(6px, 1.5vh, 14px) clamp(10px, 2vw, 22px);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--muted);
+      color: var(--muted);
+      font-family: var(--font-ui);
+      font-size: clamp(0.55rem, 1.5vh, 0.78rem);
+      padding: 6px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+    }
+
+    .btn-ghost:active {
+      filter: brightness(1.4);
+    }
+
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-display);
+      letter-spacing: 0.12em;
+      font-size: clamp(0.65rem, 1.9vh, 0.95rem);
+      color: var(--primary);
+    }
+
+    .badge svg {
+      width: clamp(14px, 2.4vh, 20px);
+      height: auto;
+    }
+
+    .turn-display {
+      font-family: var(--font-display);
+      font-size: clamp(0.75rem, 2.2vh, 1.1rem);
+      letter-spacing: 0.1em;
+      color: var(--text);
+      opacity: 0.9;
+    }
+
+    .turn-display span {
+      color: var(--primary);
+    }
+
+    .undo-click {
+      background: var(--primary);
+      color: var(--bg);
+      border: none;
+      font-weight: 700;
+      font-family: var(--font-display);
+      font-size: clamp(0.65rem, 1.9vh, 0.95rem);
+      padding: 8px 14px;
+      border-radius: 8px;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform .1s ease;
+    }
+
+    .btn-endturn {
+      background: var(--primary);
+      color: var(--bg);
+      border: none;
+      font-weight: 700;
+      font-family: var(--font-display);
+      font-size: clamp(0.65rem, 1.9vh, 0.95rem);
+      padding: 8px 14px;
+      border-radius: 8px;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform .1s ease;
+    }
+
+    .btn-endturn {
+      background: var(--primary);
+      color: var(--bg);
+      border: none;
+      font-weight: 700;
+      font-family: var(--font-display);
+      font-size: clamp(0.65rem, 1.9vh, 0.95rem);
+      padding: 8px 14px;
+      border-radius: 8px;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform .1s ease;
+    }
+
+    .btn-endturn svg {
+      width: clamp(12px, 2vh, 16px);
+      height: auto;
+    }
+
+    .btn-endturn:active {
+      transform: scale(0.95);
+    }
+
+    .btn-endturn.attention {
+      animation: pulseGlow 1.1s ease-in-out infinite;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(10px, 2vh, 22px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    body.theme-runner .main-content::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(0deg, rgba(57, 255, 20, 0.04) 0px, rgba(57, 255, 20, 0.04) 1px, transparent 1px, transparent 3px);
+    }
+
+    body.theme-corp .main-content::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(79, 195, 247, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79, 195, 247, 0.05) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+
+    .click-card {
+      width: min(92%, 640px);
+      height: 92%;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(8px, 1.8vh, 16px);
+      cursor: pointer;
+      box-shadow: 0 0 40px var(--glow);
+      transition: transform .08s ease, border-color .3s ease, box-shadow .3s ease;
+      -webkit-appearance: none;
+      appearance: none;
+      font: inherit;
+      color: inherit;
+      z-index: 2;
+      position: relative;
+      padding: 2em;
+    }
+
+    .click-card:active {
+      transform: scale(0.97);
+    }
+
+    .click-card.depleted {
+      border-color: var(--warn);
+      animation: depletedPulse 1.4s ease-in-out infinite;
+    }
+
+    .click-card.shake {
+      animation: shake .35s ease;
+    }
+
+    .pip-row {
+      display: flex;
+      gap: clamp(8px, 2vw, 18px);
+    }
+
+    .pip {
+      width: clamp(20px, 4.8vh, 38px);
+      height: clamp(20px, 4.8vh, 38px);
+      border: 2px solid var(--primary);
+      transition: background .25s ease, opacity .25s ease, box-shadow .25s ease;
+    }
+
+    body.theme-corp .pip {
+      border-radius: 5px;
+    }
+
+    body.theme-runner .pip {
+      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    }
+
+    .pip.filled {
+      background: var(--primary);
+      box-shadow: 0 0 12px var(--primary);
+    }
+
+    .pip.empty {
+      background: transparent;
+      opacity: 0.3;
+    }
+
+    .pip.pop {
+      animation: pipPop .3s ease;
+    }
+
+    .click-number {
+      font-family: var(--font-display);
+      font-weight: 700;
+      line-height: 1;
+      font-size: clamp(3rem, 15vh, 6.5rem);
+      color: var(--primary);
+      text-shadow: 0 0 24px var(--glow);
+      transition: color .3s ease, text-shadow .3s ease;
+    }
+
+    .click-card.depleted .click-number {
+      color: var(--warn);
+      text-shadow: 0 0 24px var(--warn-glow);
+    }
+
+    .click-label {
+      font-family: var(--font-ui);
+      letter-spacing: 0.22em;
+      font-size: clamp(0.65rem, 1.9vh, 0.95rem);
+      color: var(--text);
+      opacity: 0.85;
+    }
+
+    .click-hint {
+      font-family: var(--font-ui);
+      font-size: clamp(0.58rem, 1.5vh, 0.82rem);
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* ---------- Keyframes ---------- */
+    @keyframes pipPop {
+      0% {
+        transform: scale(1);
+      }
+
+      40% {
+        transform: scale(1.35);
+        filter: brightness(1.6);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      20% {
+        transform: translateX(-8px);
+      }
+
+      40% {
+        transform: translateX(8px);
+      }
+
+      60% {
+        transform: translateX(-6px);
+      }
+
+      80% {
+        transform: translateX(6px);
+      }
+    }
+
+    @keyframes pulseGlow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 6px var(--warn-glow);
+      }
+
+      50% {
+        box-shadow: 0 0 22px var(--warn-glow);
+      }
+    }
+
+    @keyframes depletedPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 28px var(--warn-glow);
+      }
+
+      50% {
+        box-shadow: 0 0 52px var(--warn-glow);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="app">
+
+    <div id="screen-select" class="screen active">
+      <div class="select-half runner-half" data-side="runner">
+        <div class="half-content">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <polygon points="13 2 3 14 11 14 9 22 21 10 13 10 13 2" /></svg>
+          <h2>RUNNER</h2>
+          <p>4 clicks per turn</p>
+        </div>
+      </div>
+      <div class="select-divider">CLICK<br>TRACKER</div>
+      <div class="select-half corp-half" data-side="corp">
+        <div class="half-content">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <rect x="4" y="3" width="16" height="18" rx="1" />
+            <line x1="9" y1="7" x2="9" y2="7.01" />
+            <line x1="15" y1="7" x2="15" y2="7.01" />
+            <line x1="9" y1="11" x2="9" y2="11.01" />
+            <line x1="15" y1="11" x2="15" y2="11.01" />
+            <line x1="9" y1="15" x2="9" y2="15.01" />
+            <line x1="15" y1="15" x2="15" y2="15.01" /></svg>
+          <h2>CORPORATION</h2>
+          <p>3 clicks per turn</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-main" class="screen">
+      <div class="topbar">
+        <button id="btn-newgame" class="btn-ghost">⟲ New Game</button>
+        <div class="badge"><span id="faction-icon"></span><span id="faction-name"></span></div>
+        <button class="undo-click" id="undo-click">Undo Click</button>
+        <div class="turn-display">TURN <span id="turn-number">1</span></div>
+        <button id="btn-endturn" class="btn-endturn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10" />
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
+          END TURN
+        </button>
+      </div>
+      <div class="main-content">
+        <button id="click-card" class="click-card" type="button">
+          <div class="pip-row" id="pip-row"></div>
+          <div class="click-number" id="click-number">0</div>
+          <div class="click-label" id="click-label">CLICKS REMAINING</div>
+          <div class="click-hint" id="click-hint">Tap to use a click</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const state = {
+        side: null,
+        max: 0,
+        clicks: 0,
+        turn: 1
+      };
+      let audioCtx = null;
+
+      // ---------- Audio ----------
+      function getCtx() {
+        if (!audioCtx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          audioCtx = new AC();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        return audioCtx;
+      }
+
+      function playClick() {
+        const ctx = getCtx();
+        const now = ctx.currentTime;
+
+        // sharp noise burst (the "tick")
+        const len = Math.floor(ctx.sampleRate * 0.045);
+        const buffer = ctx.createBuffer(1, len, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < len; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        const bp = ctx.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.frequency.value = 4200;
+        bp.Q.value = 1.1;
+        const noiseGain = ctx.createGain();
+        noiseGain.gain.setValueAtTime(0.55, now);
+        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+        noise.connect(bp).connect(noiseGain).connect(ctx.destination);
+        noise.start(now);
+        noise.stop(now + 0.05);
+
+        // low mechanical "thunk" body
+        const osc = ctx.createOscillator();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(190, now);
+        osc.frequency.exponentialRampToValueAtTime(85, now + 0.05);
+        const oscGain = ctx.createGain();
+        oscGain.gain.setValueAtTime(0.35, now);
+        oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        osc.connect(oscGain).connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.07);
+      }
+
+      function playEndTurn() {
+        playClick();
+        setTimeout(function () {
+          const ctx = getCtx();
+          const t = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(150, t);
+          osc.frequency.exponentialRampToValueAtTime(60, t + 0.14);
+          const g = ctx.createGain();
+          g.gain.setValueAtTime(0.5, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+          osc.connect(g).connect(ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.22);
+        }, 90);
+      }
+
+      function playDenied() {
+        const ctx = getCtx();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(170, now);
+        osc.frequency.setValueAtTime(110, now + 0.07);
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.16, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        osc.connect(g).connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.16);
+      }
+
+      function vibrate(pattern) {
+        if (navigator.vibrate) {
+          navigator.vibrate(pattern);
+        }
+      }
+
+      // ---------- DOM refs ----------
+      const screenSelect = document.getElementById('screen-select');
+      const screenMain = document.getElementById('screen-main');
+      const factionName = document.getElementById('faction-name');
+      const factionIcon = document.getElementById('faction-icon');
+      const turnNumberEl = document.getElementById('turn-number');
+      const pipRow = document.getElementById('pip-row');
+      const clickCard = document.getElementById('click-card');
+      const clickNumber = document.getElementById('click-number');
+      const clickLabel = document.getElementById('click-label');
+      const clickHint = document.getElementById('click-hint');
+      const undoTurnBtn = document.getElementById('undo-click');
+      const endTurnBtn = document.getElementById('btn-endturn');
+      const newGameBtn = document.getElementById('btn-newgame');
+
+      const RUNNER_ICON =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 11 14 9 22 21 10 13 10 13 2"/></svg>';
+      const CORP_ICON =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1"/><line x1="9" y1="7" x2="9" y2="7.01"/><line x1="15" y1="7" x2="15" y2="7.01"/><line x1="9" y1="11" x2="9" y2="11.01"/><line x1="15" y1="11" x2="15" y2="11.01"/><line x1="9" y1="15" x2="9" y2="15.01"/><line x1="15" y1="15" x2="15" y2="15.01"/></svg>';
+
+      // ---------- Logic ----------
+      function tryLockLandscape() {
+        try {
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(function () {});
+          }
+        } catch (e) {
+          /* not supported, ignore */ }
+      }
+
+      function buildPips() {
+        pipRow.innerHTML = '';
+        for (let i = 0; i < state.max; i++) {
+          const p = document.createElement('div');
+          p.className = 'pip';
+          pipRow.appendChild(p);
+        }
+      }
+
+      function render() {
+        const pips = pipRow.children;
+        for (let i = 0; i < pips.length; i++) {
+          pips[i].classList.toggle('filled', i < state.clicks);
+          pips[i].classList.toggle('empty', i >= state.clicks);
+        }
+        clickNumber.textContent = state.clicks;
+        turnNumberEl.textContent = state.turn;
+        const depleted = state.clicks === 0;
+        clickCard.classList.toggle('depleted', depleted);
+        endTurnBtn.classList.toggle('attention', depleted);
+        clickLabel.textContent = depleted ? 'OUT OF CLICKS' : 'CLICKS REMAINING';
+        clickHint.textContent = depleted ? 'End your turn to continue' : 'Tap to use a click';
+      }
+
+      function selectSide(side) {
+        state.side = side;
+        state.max = side === 'runner' ? 4 : 3;
+        state.clicks = state.max;
+        state.turn = 1;
+
+        document.body.classList.remove('theme-runner', 'theme-corp');
+        document.body.classList.add('theme-' + side);
+        factionName.textContent = side === 'runner' ? 'RUNNER' : 'CORPORATION';
+        factionIcon.innerHTML = side === 'runner' ? RUNNER_ICON : CORP_ICON;
+
+        buildPips();
+        render();
+
+        screenSelect.classList.remove('active');
+        screenMain.classList.add('active');
+      }
+
+      function handleClickCard() {
+        getCtx();
+        if (state.clicks > 0) {
+          state.clicks--;
+          const justEmptiedIndex = state.clicks;
+          render();
+          const pips = pipRow.children;
+          const pip = pips[justEmptiedIndex];
+          if (pip) {
+            pip.classList.add('pop');
+            setTimeout(function () {
+              pip.classList.remove('pop');
+            }, 300);
+          }
+          playClick();
+          vibrate(10);
+        } else {
+          clickCard.classList.add('shake');
+          setTimeout(function () {
+            clickCard.classList.remove('shake');
+          }, 350);
+          playDenied();
+          vibrate(40);
+        }
+      }
+
+      function handleUndoTurn() {
+        getCtx();
+        if (state.clicks === state.max) {
+          return;
+        }
+        state.clicks++;
+        const justAddedIndex = state.clicks;
+        render();
+      }
+
+      function handleEndTurn() {
+        getCtx();
+        state.turn++;
+        state.clicks = state.max;
+        render();
+        const pips = pipRow.children;
+        for (let i = 0; i < pips.length; i++) {
+          (function (pip, idx) {
+            pip.style.animationDelay = (idx * 0.05) + 's';
+            pip.classList.add('pop');
+            setTimeout(function () {
+              pip.classList.remove('pop');
+              pip.style.animationDelay = '';
+            }, 300 + idx * 50);
+          })(pips[i], i);
+        }
+        playEndTurn();
+        vibrate([10, 30, 15]);
+      }
+
+      function handleNewGame() {
+        const ok = window.confirm('Start a new game? This resets your clicks and turn count.');
+        if (ok) {
+          screenMain.classList.remove('active');
+          screenSelect.classList.add('active');
+        }
+      }
+
+      // ---------- Wire up events ----------
+      document.querySelectorAll('.select-half').forEach(function (el) {
+        el.addEventListener('click', function () {
+          getCtx();
+          selectSide(el.getAttribute('data-side'));
+        });
+      });
+      clickCard.addEventListener('click', handleClickCard);
+      undoTurnBtn.addEventListener('click', handleUndoTurn);
+      endTurnBtn.addEventListener('click', handleEndTurn);
+      newGameBtn.addEventListener('click', handleNewGame);
+
+    })();
+  </script>
+</body>
+
+</html>
