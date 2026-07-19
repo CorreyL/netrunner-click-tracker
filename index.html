@@ -263,23 +263,6 @@
       transition: transform .1s ease;
     }
 
-    .btn-endturn {
-      background: var(--primary);
-      color: var(--bg);
-      border: none;
-      font-weight: 700;
-      font-family: var(--font-display);
-      font-size: clamp(0.65rem, 1.9vh, 0.95rem);
-      padding: 8px 14px;
-      border-radius: 8px;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: transform .1s ease;
-    }
-
     .btn-endturn svg {
       width: clamp(12px, 2vh, 16px);
       height: auto;
@@ -322,35 +305,35 @@
     }
 
     .click-card {
-      width: min(92%, 640px);
-      max-height: 50%;
-      background: var(--surface);
-      border: 2px solid var(--border);
-      border-radius: 22px;
+      width: 100%;
+      height: 100%;
+      max-height: none;
+      background: transparent;
+      border: none;
+      border-radius: 0;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
       justify-content: center;
-      gap: clamp(8px, 1.8vh, 16px);
+      gap: 0;
       cursor: pointer;
-      box-shadow: 0 0 40px var(--glow);
-      transition: transform .08s ease, border-color .3s ease, box-shadow .3s ease;
+      box-shadow: none;
+      transition: transform .08s ease;
       -webkit-appearance: none;
       appearance: none;
       font: inherit;
       color: inherit;
       z-index: 2;
       position: relative;
-      padding: 2em;
+      padding: 0;
     }
 
     .click-card:active {
-      transform: scale(0.97);
+      transform: scale(0.98);
     }
 
     .click-card.depleted {
-      border-color: var(--warn);
-      animation: depletedPulse 1.4s ease-in-out infinite;
+      animation: none;
     }
 
     .click-card.shake {
@@ -359,12 +342,17 @@
 
     .pip-row {
       display: flex;
-      gap: clamp(8px, 2vw, 18px);
+      align-items: center;
+      justify-content: center;
+      gap: clamp(14px, 4vw, 40px);
+      flex-wrap: wrap;
+      width: 100%;
+      height: 100%;
     }
 
     .pip {
-      width: clamp(20px, 4.8vh, 38px);
-      height: clamp(20px, 4.8vh, 38px);
+      width: clamp(64px, 20vh, 220px);
+      height: clamp(64px, 20vh, 220px);
       transition: opacity .25s ease, filter .25s ease, transform .2s ease;
       display: block;
     }
@@ -375,7 +363,7 @@
 
     .pip.filled {
       opacity: 1;
-      filter: drop-shadow(0 0 8px var(--primary));
+      filter: drop-shadow(0 0 14px var(--primary));
     }
 
     .pip.filled path {
@@ -393,36 +381,6 @@
 
     .pip.pop {
       animation: pipPop .3s ease;
-    }
-
-    .click-number {
-      font-family: var(--font-display);
-      font-weight: 700;
-      line-height: 1;
-      font-size: clamp(3rem, 15vh, 6.5rem);
-      color: var(--primary);
-      text-shadow: 0 0 24px var(--glow);
-      transition: color .3s ease, text-shadow .3s ease;
-    }
-
-    .click-card.depleted .click-number {
-      color: var(--warn);
-      text-shadow: 0 0 24px var(--warn-glow);
-    }
-
-    .click-label {
-      font-family: var(--font-ui);
-      letter-spacing: 0.22em;
-      font-size: clamp(0.65rem, 1.9vh, 0.95rem);
-      color: var(--text);
-      opacity: 0.85;
-    }
-
-    .click-hint {
-      font-family: var(--font-ui);
-      font-size: clamp(0.58rem, 1.5vh, 0.82rem);
-      color: var(--muted);
-      letter-spacing: 0.06em;
     }
 
     /* ---------- Keyframes ---------- */
@@ -534,9 +492,6 @@
       <div class="main-content">
         <button id="click-card" class="click-card" type="button">
           <div class="pip-row" id="pip-row"></div>
-          <div class="click-number" id="click-number">0</div>
-          <div class="click-label" id="click-label">CLICKS REMAINING</div>
-          <div class="click-hint" id="click-hint">Tap to use a click</div>
         </button>
       </div>
     </div>
@@ -650,9 +605,6 @@
       const turnNumberEl = document.getElementById('turn-number');
       const pipRow = document.getElementById('pip-row');
       const clickCard = document.getElementById('click-card');
-      const clickNumber = document.getElementById('click-number');
-      const clickLabel = document.getElementById('click-label');
-      const clickHint = document.getElementById('click-hint');
       const undoTurnBtn = document.getElementById('undo-click');
       const endTurnBtn = document.getElementById('btn-endturn');
       const newGameBtn = document.getElementById('btn-newgame');
@@ -702,13 +654,10 @@
           pips[i].classList.toggle('filled', i < state.clicks);
           pips[i].classList.toggle('empty', i >= state.clicks);
         }
-        clickNumber.textContent = state.clicks;
         turnNumberEl.textContent = state.turn;
         const depleted = state.clicks === 0;
         clickCard.classList.toggle('depleted', depleted);
         endTurnBtn.classList.toggle('attention', depleted);
-        clickLabel.textContent = depleted ? 'OUT OF CLICKS' : 'CLICKS REMAINING';
-        clickHint.textContent = depleted ? 'End your turn to continue' : 'Tap to use a click';
       }
 
       function selectSide(side) {
