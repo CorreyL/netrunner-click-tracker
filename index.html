@@ -1048,15 +1048,32 @@
       // ---------- No Sleep (shared state) ----------
       const noSleep = new NoSleep();
       let wakeLockEnabled = false;
+      let noSleepTimeout = null;
+      const NO_SLEEP_TIMEOUT_MS = 40 * 60 * 1000;
 
       function setNoSleep(on) {
+
+        if (noSleepTimeout) {
+          clearTimeout(noSleepTimeout);
+          noSleepTimeout = null;
+        }
+
         if (on && !wakeLockEnabled) {
           noSleep.enable();
           wakeLockEnabled = true;
+
+          noSleepTimeout = setTimeout(function () {
+            noSleep.disable();
+            wakeLockEnabled = false;
+            if (noSleepSwitch) noSleepSwitch.checked = false;
+            window.alert("No Sleep has been turned off automatically after 40 minutes to help prevent possible screen burn-in on OLED displays. If you still need it, you can re-enable No Sleep from Settings.");
+          }, NO_SLEEP_TIMEOUT_MS);
+
         } else if (!on && wakeLockEnabled) {
           noSleep.disable();
           wakeLockEnabled = false;
         }
+
         if (noSleepSwitch) {
           noSleepSwitch.checked = wakeLockEnabled;
         }
