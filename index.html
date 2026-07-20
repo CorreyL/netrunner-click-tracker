@@ -744,15 +744,40 @@
         }
       }
 
+      // ---------- Fullscreen (with iOS Safari fallback) ----------
+      function isIOS() {
+        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      }
+
+      function isStandalone() {
+        return ('standalone' in window.navigator) && window.navigator.standalone === true;
+      }
+
       function handleFullScreen() {
         const el = document.documentElement;
 
+        // Already launched from the home-screen icon — runs fullscreen already.
+        if (isStandalone()) {
+          return;
+        }
+
+        if (isIOS()) {
+          // iOS Safari does not implement the Fullscreen API for regular
+          // web pages (this is a platform limitation, not a feature-detect
+          // bug). The only way to get a chrome-less view on iPhone/iPad is
+          // to launch the page as an installed home-screen app.
+          window.alert('iPhone/iPad Safari doesn\'t support in-browser fullscreen. Tap the Share icon, then "Add to Home Screen" — launching it from there runs fullscreen automatically.');
+          return;
+        }
+
         if (el.requestFullscreen) {
           el.requestFullscreen();
-        } else if (el.webkitRequestFullscreen) { // Safari/iOS
+        } else if (el.webkitRequestFullscreen) { // older desktop Safari/Chrome
           el.webkitRequestFullscreen();
         } else if (el.msRequestFullscreen) { // old Edge/IE
           el.msRequestFullscreen();
+        } else {
+          window.alert('Fullscreen isn\'t supported on this browser.');
         }
       }
 
