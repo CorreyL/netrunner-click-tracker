@@ -495,9 +495,25 @@
       align-items: center;
       justify-content: center;
       gap: clamp(14px, 4vw, 40px);
-      flex-wrap: wrap;
       width: 100%;
       height: 100%;
+    }
+
+    .pip-row.horizontal {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+
+    .pip-row.vertical {
+      flex-direction: column;
+      flex-wrap: nowrap;
+    }
+
+    @media (orientation: landscape) {
+      .pip-row.vertical {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
     }
 
     .pip {
@@ -877,6 +893,14 @@
         document.body.classList.add('theme-' + side);
 
         buildPips();
+
+        pipRow.classList.remove('horizontal', 'vertical');
+        if (side === 'corp') {
+          pipRow.classList.add('vertical');
+        } else {
+          pipRow.classList.add('horizontal');
+        }
+
         render();
 
         screenSelect.classList.remove('active');
