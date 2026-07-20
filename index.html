@@ -384,6 +384,39 @@
       flex-shrink: 0;
     }
 
+    /* Turn Count adjustment buttons */
+    .turn-counter-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-counter {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+      touch-action: manipulation;
+    }
+
+    .btn-counter:active {
+      background: var(--border);
+      border-color: var(--primary);
+      transform: scale(0.94);
+    }
+
     .switch {
       position: relative;
       width: 46px;
@@ -718,12 +751,17 @@
       <div class="popover-row">
         <div>
           <span class="popover-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
             Turn Count
           </span>
         </div>
-        <div>
-          <button id="decrement-turn">&lt;</button>
-          <button id="increment-turn">&gt;</button>
+        <div class="turn-counter-controls">
+          <button id="decrement-turn" class="btn-counter" aria-label="Decrease Turn">&lt;</button>
+          <button id="increment-turn" class="btn-counter" aria-label="Increase Turn">&gt;</button>
         </div>
       </div>
     </div>
