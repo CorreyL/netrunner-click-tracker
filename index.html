@@ -715,6 +715,17 @@
           <span class="switch-track"></span>
         </label>
       </div>
+      <div class="popover-row">
+        <div>
+          <span class="popover-label">
+            Turn Count
+          </span>
+        </div>
+        <div>
+          <button id="decrement-turn">&lt;</button>
+          <button id="increment-turn">&gt;</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -826,6 +837,8 @@
       const clickCard = document.getElementById('click-card');
       const undoTurnBtn = document.getElementById('undo-click');
       const endTurnBtn = document.getElementById('btn-endturn');
+      const decrementTurnBtn = document.getElementById('decrement-turn');
+      const incrementTurnBtn = document.getElementById('increment-turn');
       const newGameBtn = document.getElementById('btn-newgame');
       const settingsPopover = document.getElementById('settings-popover');
       const noSleepSwitch = document.getElementById('toggle-nosleep-switch');
@@ -961,6 +974,18 @@
         }
         playEndTurn();
         vibrate([10, 30, 15]);
+      }
+
+      function handleDecrementTurn() {
+        if (state.turn === 1) return;
+        state.turn--;
+        render();
+      }
+
+      function handleIncrementTurn() {
+        if (state.turn === 99) return;
+        state.turn++;
+        render();
       }
 
       function handleNewGame() {
@@ -1149,6 +1174,8 @@
       clickCard.addEventListener('click', handleClickCard);
       undoTurnBtn.addEventListener('click', handleUndoTurn);
       endTurnBtn.addEventListener('click', handleEndTurn);
+      incrementTurnBtn.addEventListener('click', handleIncrementTurn);
+      decrementTurnBtn.addEventListener('click', handleDecrementTurn);
       newGameBtn.addEventListener('click', handleNewGame);
       settingsButtons.forEach(function (btn) {
         btn.addEventListener('click', function (e) {
