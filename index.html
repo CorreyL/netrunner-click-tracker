@@ -156,13 +156,6 @@
       text-shadow: 0 0 12px rgba(0, 0, 0, 0.9);
     }
 
-    .toggle-no-sleep {
-      right: 43%;
-      position: absolute;
-      z-index: 100;
-      margin-top: 1em;
-    }
-
     /* ---------- Main screen ---------- */
     #screen-main {
       flex-direction: column;
@@ -1002,10 +995,6 @@
         if (noSleepSwitch) {
           noSleepSwitch.checked = wakeLockEnabled;
         }
-        const legacyToggle = document.getElementById('toggle-no-sleep');
-        if (legacyToggle) {
-          legacyToggle.classList.toggle('active', wakeLockEnabled);
-        }
       }
 
       // ---------- Settings popover ----------
@@ -1072,13 +1061,6 @@
       if (fullscreenSwitch) {
         fullscreenSwitch.addEventListener('change', function () {
           toggleFullscreen(fullscreenSwitch.checked);
-        });
-      }
-
-      const legacyNoSleepToggle = document.getElementById('toggle-no-sleep');
-      if (legacyNoSleepToggle) {
-        legacyNoSleepToggle.addEventListener('click', function () {
-          setNoSleep(!wakeLockEnabled);
         });
       }
     })();
